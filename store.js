@@ -31,6 +31,9 @@ const setDirection = createAction(SET_DIRECTION);
 const SET_MOTION = 'SET_MOTION';
 const setMotion = createAction(SET_MOTION);
 
+const SET_FOOD = 'SET_FOOD';
+const setFood = createAction(SET_FOOD);
+
 // Handlers:
 snakeStore.addHandler({
   [ADD_POINT]: (state, action) => {
@@ -80,5 +83,12 @@ snakeStore.addHandler({
     if (limit.includes(x) || limit.includes(y)) return;
     state.snake.body.unshift({ x, y });
     state.snake.body.pop();
+  }
+});
+
+snakeStore.addHandler({
+  [SET_FOOD]: state => {
+    state.food.x = getRandom(50);
+    state.food.y = getRandom(50);
   }
 });

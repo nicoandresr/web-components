@@ -21,11 +21,13 @@ const keyMap = {
   ArrowRight: 'right'
 };
 
-const getRandom = max => Math.floor(Math.random() * Math.floor(max));
+const getRandom = (max, min = 0) => Math.floor(Math.random() * (max - min) + min);
 
 window.onkeyup = e => keyMap[e.code] && snakeDispatcher.dispatch(setDirection(keyMap[e.code]));
 
 window.setInterval(() => snakeDispatcher.dispatch(setMotion()), 200);
+
+window.setInterval(() => snakeDispatcher.dispatch(setFood()), getRandom(5, 11) * 1000);
 
 customElements.define('snake-body', Block);
 customElements.define('snake-food', Food);
