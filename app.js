@@ -1,35 +1,3 @@
-class Board extends HTMLElement {
-  constructor() {
-    super();
-    this.style = Board.styled();
-  }
-}
-
-Board.styled = () => `
-  background-color: #000;
-  display: flex;
-  height: 800px;
-  margin: 0 auto;
-  width: 800px;
-`;
-
-class Score extends HTMLElement {
-  constructor() {
-    super();
-    this.style = Score.styled();
-    this.innerHTML = 'Score: 0';
-  }
-}
-
-Score.styled = () => `
-  color: #F3F3F3;
-  display: flex;
-  font-size: 28px;
-  margin: auto;
-  width: max-content;
-`;
-
-
 class SnakeGame extends HTMLElement {
   constructor() {
     super();
@@ -46,6 +14,21 @@ SnakeGame.styled = () => `
   flex: 1;
 `;
 
+const keyMap = {
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  ArrowLeft: 'left',
+  ArrowRight: 'right'
+};
+
+const getRandom = max => Math.floor(Math.random() * Math.floor(max));
+
+window.onkeyup = e => keyMap[e.code] && snakeDispatcher.dispatch(setDirection(keyMap[e.code]));
+
+window.setInterval(() => snakeDispatcher.dispatch(setMotion()), 200);
+
+customElements.define('snake-body', Block);
+customElements.define('snake-food', Food);
 customElements.define('game-board', Board);
 customElements.define('game-score', Score);
 customElements.define('snake-game', SnakeGame);
