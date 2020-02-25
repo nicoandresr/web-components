@@ -27,5 +27,6 @@ Score.styled = (props = {}) => `
     font-size: 28px;
     margin: auto;
     width: max-content;
+    line-height: 1.8;
   }
 `;
