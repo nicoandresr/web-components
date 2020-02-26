@@ -3,18 +3,18 @@ class Score extends HTMLElement {
     super();
 
     const shadow = this.attachShadow({ mode: 'open' });
-    const span = document.createElement('span');
     const style = document.createElement('style');
+    const span = document.createElement('span');
 
-    shadow.appendChild(span);
     shadow.appendChild(style);
+    shadow.appendChild(span);
 
     style.textContent = Score.styled();
-    span.textContent = 'Score 0';
+    span.textContent = 'Score: 0';
 
     snakeStore.addListener(state => {
       const { isMaxScore, points } = state.score;
-      span.textContent = `Score ${points}`;
+      span.textContent = `Score: ${points}`;
       style.textContent = Score.styled({ isMaxScore });
     });
   }

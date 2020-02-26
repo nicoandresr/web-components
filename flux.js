@@ -3,7 +3,7 @@ class Store {
     this.__listeners = [];
     this.__actionHandlers = [];
     const localStg = localStorage['snake-storage'];
-    this.__state = localStg ? JSON.parse(localStg) : { ...initialState };
+    this.__state = localStg ? JSON.parse(localStg) : initialState;
     dispatcher.register(this.__onDispatch.bind(this));
   }
 

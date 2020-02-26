@@ -4,27 +4,27 @@ class Board extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
-    const div = document.createElement('div');
+    const main = document.createElement('main');
 
     shadow.appendChild(style);
-    shadow.appendChild(div);
+    shadow.appendChild(main);
     
     style.textContent = Board.styled();
 
     snakeStore.addListener(state => {
-      div.innerHTML = '';
+      main.innerHTML = '';
 
       state.snake.body.forEach(({ x , y }) => 
-        div.appendChild(new Block({ x, y }))
+        main.appendChild(new Block({ x, y }))
       );
 
-      div.appendChild(new Food({ ...state.food }));
+      main.appendChild(new Food({ ...state.food }));
     });
   }
 }
 
 Board.styled = () => `
-  div {
+  main {
     background-color: #000;
     display: flex;
     height: 800px;

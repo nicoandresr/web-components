@@ -1,8 +1,9 @@
 // InitialState:
-const initialState = {
-  score: { points: 0, max: 0, isMaxScore: false },
+const getInitialState = () => ({
   direction: 'right',
   food: { x: 30, y: 15 },
+  gameOver: false,
+  score: { points: 0, max: 0, isMaxScore: false },
   snake: {
     body: [
       { x: 25, y: 25},
@@ -10,11 +11,11 @@ const initialState = {
       { x: 23, y: 25},
     ]
   }
-};
+});
 
 // Store:
 const snakeDispatcher = new Dispatcher();
-const snakeStore = new Store(snakeDispatcher, initialState);
+const snakeStore = new Store(snakeDispatcher, getInitialState());
 
 // Actions:
 const createAction = type => payload => ({ type, payload });
@@ -34,6 +35,9 @@ const setMotion = createAction(SET_MOTION);
 const SET_FOOD = 'SET_FOOD';
 const setFood = createAction(SET_FOOD);
 
+const GAME_OVER = 'GAME_OVER';
+const gameOver = createAction(GAME_OVER);
+
 // Handlers:
 snakeStore.addHandler({
   [ADD_POINT]: (state, action) => {
@@ -49,7 +53,7 @@ snakeStore.addHandler({
 snakeStore.addHandler({
   [RESTART_GAME]: state => {
     const { max } = state.score;
-    Object.assign(state, initialState);
+    Object.assign(state, getInitialState());
     state.score.max = max;
   }
 });
@@ -69,7 +73,8 @@ snakeStore.addHandler({
 
 snakeStore.addHandler({
   [SET_MOTION]: state => {
-    const { direction } = state;
+    if (state.gameOver) return;
+    const { direction, food, snake } = state;
     const limit = [-1, 50];
     const model = {
       right: ({ x, y }) => ({ x: x + 1, y }),
@@ -81,14 +86,29 @@ snakeStore.addHandler({
     const [head] = state.snake.body;
     const { x, y } = model[direction](head);
     if (limit.includes(x) || limit.includes(y)) return;
+    if (snake.body.some(b => b.x === x && b.y === y)) {
+      snakeDispatcher.dispatch(gameOver());
+      return;
+    }
     state.snake.body.unshift({ x, y });
+    if (food.x === x && food.y === y) {
+      snakeDispatcher.dispatch(setFood());
+      snakeDispatcher.dispatch(addPoint());
+      return;
+    }
+
     state.snake.body.pop();
   }
 });
 
 snakeStore.addHandler({
   [SET_FOOD]: state => {
+    if (state.gameOver) return;
     state.food.x = getRandom(50);
     state.food.y = getRandom(50);
   }
+});
+
+snakeStore.addHandler({
+  [GAME_OVER]: state => state.gameOver = true
 });
