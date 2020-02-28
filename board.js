@@ -19,6 +19,8 @@ class Board extends HTMLElement {
       );
 
       main.appendChild(new Food({ ...state.food }));
+
+      state.gameOver && main.appendChild(new GameOver());
     });
   }
 }
@@ -31,5 +33,14 @@ Board.styled = () => `
     margin: 0 auto;
     position: relative;
     width: 800px;
+  }
+
+  game-over {
+    color: white;
+    font-size: 48px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    translate: -50% -50%;
   }
 `;

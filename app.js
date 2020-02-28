@@ -49,4 +49,5 @@ customElements.define('snake-food', Food);
 customElements.define('game-board', Board);
 customElements.define('game-score', Score);
 customElements.define('game-button', Button);
+customElements.define('game-over', GameOver);
 customElements.define('snake-game', SnakeGame);
