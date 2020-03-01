@@ -38,6 +38,9 @@ const setFood = createAction(SET_FOOD);
 const GAME_OVER = 'GAME_OVER';
 const gameOver = createAction(GAME_OVER);
 
+const RELOCATE_SNAKE = 'RELOCATE_SNAKE';
+const relocateSnake = createAction(RELOCATE_SNAKE);
+
 // Handlers:
 snakeStore.addHandler({
   [ADD_POINT]: (state, action) => {
@@ -85,7 +88,10 @@ snakeStore.addHandler({
 
     const [head] = state.snake.body;
     const { x, y } = model[direction](head);
-    if (limit.includes(x) || limit.includes(y)) return;
+    if (limit.includes(x) || limit.includes(y)) {
+      snakeDispatcher.dispatch(relocateSnake());
+      return;
+    }
     if (snake.body.some(b => b.x === x && b.y === y)) {
       snakeDispatcher.dispatch(gameOver());
       return;
@@ -111,4 +117,15 @@ snakeStore.addHandler({
 
 snakeStore.addHandler({
   [GAME_OVER]: state => state.gameOver = true
+});
+
+snakeStore.addHandler({
+  [RELOCATE_SNAKE]: state => {
+    const [{x, y}] = state.snake.body;
+    const model = { 0: 7, 49: -7 };
+    state.snake.body.forEach(chunk => {
+      chunk.x = chunk.x + (model[x] ? model[x] : 0);
+      chunk.y = chunk.y + (model[y] ? model[y] : 0);
+    });
+  }
 });
