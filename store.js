@@ -125,11 +125,12 @@ snakeStore.addHandler({
   [RELOCATE_SNAKE]: state => {
     const model = { 0: 7, 49: -7 };
     const [{x, y}] = state.snake.body;
-
     state.direction = inverseDirection[state.direction];
+
     if (model[x]) {
       state.snake.body.unshift({ x, y: y + (y > 25 ? -1 : 1) });
     }
+
     if (model[y]) {
       state.snake.body.unshift({ x: x + (x > 25 ? -1 : 1), y });
     }
