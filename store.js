@@ -42,6 +42,14 @@ const RELOCATE_SNAKE = 'RELOCATE_SNAKE';
 const relocateSnake = createAction(RELOCATE_SNAKE);
 
 // Handlers:
+
+const inverseDirection = {
+  up: 'down'
+  down: 'up',
+  left: 'rigth',
+  right: 'left',
+};
+
 snakeStore.addHandler({
   [ADD_POINT]: (state, action) => {
     const { points, max } = state.score;
@@ -63,13 +71,7 @@ snakeStore.addHandler({
 
 snakeStore.addHandler({
   [SET_DIRECTION]: (state, { payload }) => {
-    const model = {
-      up: ['left','right'],
-      down: ['left','right'],
-      left: ['up', 'down'],
-      right: ['up', 'down'],
-    };
-    if (!model[state.direction].includes(payload)) return;
+    if (inverseDirection[state.direction] === payload) return;
     state.direction = payload;
   }
 });
@@ -121,8 +123,18 @@ snakeStore.addHandler({
 
 snakeStore.addHandler({
   [RELOCATE_SNAKE]: state => {
-    const [{x, y}] = state.snake.body;
     const model = { 0: 7, 49: -7 };
+    const [{x, y}] = state.snake.body;
+
+    state.direction = inverseDirection[state.direction];
+    if (model[x]) {
+      state.snake.body.unshift({ x, y: y + (y > 25 ? -1 : 1) });
+    }
+    if (model[y]) {
+      state.snake.body.unshift({ x: x + (x > 25 ? -1 : 1), y });
+    }
+    state.snake.body.pop();
+
     state.snake.body.forEach(chunk => {
       chunk.x = chunk.x + (model[x] ? model[x] : 0);
       chunk.y = chunk.y + (model[y] ? model[y] : 0);
