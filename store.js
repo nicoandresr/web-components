@@ -41,12 +41,15 @@ const gameOver = createAction(GAME_OVER);
 const RELOCATE_SNAKE = 'RELOCATE_SNAKE';
 const relocateSnake = createAction(RELOCATE_SNAKE);
 
+const RESIZE_BOARD = 'RESIZE_BOARD';
+const resizeBoard = createAction(RESIZE_BOARD);
+
 // Handlers:
 
 const inverseDirection = {
-  up: 'down'
+  up: 'down',
   down: 'up',
-  left: 'rigth',
+  left: 'right',
   right: 'left',
 };
 
@@ -140,5 +143,10 @@ snakeStore.addHandler({
       chunk.x = chunk.x + (model[x] ? model[x] : 0);
       chunk.y = chunk.y + (model[y] ? model[y] : 0);
     });
+  }
+});
+
+snakeStore.addHandler({
+  [RESIZE_BOARD]: state => {
   }
 });
