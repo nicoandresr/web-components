@@ -14,6 +14,8 @@ class Board extends HTMLElement {
     snakeStore.addListener(state => {
       main.innerHTML = '';
 
+      style.textContent = Board.styled(state);
+
       state.snake.body.forEach(({ x , y }) => 
         main.appendChild(new Block({ x, y }))
       );
@@ -25,14 +27,14 @@ class Board extends HTMLElement {
   }
 }
 
-Board.styled = () => `
+Board.styled = ({ boardSize = 50} = {}) => `
   main {
     background-color: #000;
     display: flex;
-    height: 800px;
+    height: ${boardSize * 16}px;
     margin: 0 auto;
     position: relative;
-    width: 800px;
+    width: ${boardSize * 16}px;
   }
 
   game-over {

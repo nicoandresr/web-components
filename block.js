@@ -15,7 +15,7 @@ class Block extends HTMLElement {
 
 Block.styled = props => `
   div {
-    background-color: ${props.food ? 'red' : 'pink'};
+    background-color: ${props.food ? 'blue' : 'pink'};
     border-radius: ${props.food ? '16px' : '0'};
     height: 16px;
     left: ${props.x ? (props.x * 16) + 'px' : '0'};

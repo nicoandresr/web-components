@@ -1,5 +1,6 @@
 // InitialState:
 const getInitialState = () => ({
+  boardSize: 50,
   direction: 'right',
   food: { x: 30, y: 15 },
   gameOver: false,
@@ -35,18 +36,18 @@ const setMotion = createAction(SET_MOTION);
 const SET_FOOD = 'SET_FOOD';
 const setFood = createAction(SET_FOOD);
 
-const GAME_OVER = 'GAME_OVER';
-const gameOver = createAction(GAME_OVER);
-
 const RELOCATE_SNAKE = 'RELOCATE_SNAKE';
 const relocateSnake = createAction(RELOCATE_SNAKE);
+
+const REVERSE_SNAKE_DIRECTION = 'REVERSE_SNAKE_DIRECTION';
+const revertDirection= createAction(REVERSE_SNAKE_DIRECTION);
 
 const RESIZE_BOARD = 'RESIZE_BOARD';
 const resizeBoard = createAction(RESIZE_BOARD);
 
 // Handlers:
 
-const inverseDirection = {
+const inverseModel = {
   up: 'down',
   down: 'up',
   left: 'right',
@@ -74,7 +75,7 @@ snakeStore.addHandler({
 
 snakeStore.addHandler({
   [SET_DIRECTION]: (state, { payload }) => {
-    if (inverseDirection[state.direction] === payload) return;
+    if (inverseModel[state.direction] === payload) return;
     state.direction = payload;
   }
 });
@@ -83,7 +84,7 @@ snakeStore.addHandler({
   [SET_MOTION]: state => {
     if (state.gameOver) return;
     const { direction, food, snake } = state;
-    const limit = [-1, 50];
+    const limit = [-1, state.boardSize];
     const model = {
       right: ({ x, y }) => ({ x: x + 1, y }),
       left: ({ x, y }) => ({ x: x - 1, y }),
@@ -94,11 +95,13 @@ snakeStore.addHandler({
     const [head] = state.snake.body;
     const { x, y } = model[direction](head);
     if (limit.includes(x) || limit.includes(y)) {
-      snakeDispatcher.dispatch(relocateSnake());
+      snakeDispatcher.dispatch(revertDirection());
+      snakeDispatcher.dispatch(resizeBoard());
       return;
     }
+    
     if (snake.body.some(b => b.x === x && b.y === y)) {
-      snakeDispatcher.dispatch(gameOver());
+      state.gameOver = true;
       return;
     }
     state.snake.body.unshift({ x, y });
@@ -115,38 +118,53 @@ snakeStore.addHandler({
 snakeStore.addHandler({
   [SET_FOOD]: state => {
     if (state.gameOver) return;
-    state.food.x = getRandom(50);
-    state.food.y = getRandom(50);
+    state.food.x = getRandom(state.boardSize);
+    state.food.y = getRandom(state.boardSize);
   }
 });
 
 snakeStore.addHandler({
-  [GAME_OVER]: state => state.gameOver = true
-});
-
-snakeStore.addHandler({
-  [RELOCATE_SNAKE]: state => {
-    const model = { 0: 7, 49: -7 };
+  [REVERSE_SNAKE_DIRECTION]: state => {
+    const { boardSize, direction } = state;
+    const middleBoard = Math.floor(boardSize / 2);
+    const upperLimit = boardSize - 1;
     const [{x, y}] = state.snake.body;
-    state.direction = inverseDirection[state.direction];
 
-    if (model[x]) {
-      state.snake.body.unshift({ x, y: y + (y > 25 ? -1 : 1) });
+    state.direction = inverseModel[direction];
+
+    if (['left', 'right'].includes(direction) && ( x <= 0 || x >= upperLimit)) {
+      state.snake.body.unshift({ x, y: y + (y > middleBoard ? -1 : 1) });
     }
 
-    if (model[y]) {
-      state.snake.body.unshift({ x: x + (x > 25 ? -1 : 1), y });
+    if (['up', 'down'].includes(direction) && ( y <= 0 || y >= upperLimit)) {
+      state.snake.body.unshift({ x: x + (x > middleBoard ? -1 : 1), y });
     }
+
     state.snake.body.pop();
-
-    state.snake.body.forEach(chunk => {
-      chunk.x = chunk.x + (model[x] ? model[x] : 0);
-      chunk.y = chunk.y + (model[y] ? model[y] : 0);
-    });
   }
 });
 
 snakeStore.addHandler({
   [RESIZE_BOARD]: state => {
+    if (state.boardSize <= 15) return;
+    state.boardSize = state.boardSize - 7;
+
+    snakeDispatcher.dispatch(relocateSnake());
+  }
+});
+
+snakeStore.addHandler({
+  [RELOCATE_SNAKE]: state => {
+    const middleBoard = Math.floor(state.boardSize / 2);
+    const upperLimit = state.boardSize - 1;
+    const [{x, y}] = state.snake.body;
+    const relocate = (point, axis) => point + (axis >= upperLimit ? -7 : 0);
+
+    state.snake.body.forEach(chunk => {
+      chunk.x = relocate(chunk.x, x);
+      chunk.y = relocate(chunk.y, y);
+    });
+
+    snakeDispatcher.dispatch(setFood());
   }
 });
