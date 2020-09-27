@@ -11,22 +11,29 @@ class Board extends HTMLElement {
     
     style.textContent = Board.styled();
 
+    // This is where the magic happens in each render.
+    // Each listener is called afters every state mutation.
     snakeStore.addListener(state => {
+      // First we cleans the board.
       main.innerHTML = '';
-
+      // We apply the styles with the state for 
+      // calculating the board size and position.
       style.textContent = Board.styled(state);
-
+      // We renders the snake body, each chunk
+      // is a small square with x and y coordinates.
       state.snake.body.forEach(({ x , y }) => 
         main.appendChild(new Block({ x, y }))
       );
-
+      // We renders the food.
       main.appendChild(new Food({ ...state.food }));
-
+      // And finally if the game is over we renders
+      // the "Game Over" message.
       state.gameOver && main.appendChild(new GameOver());
     });
   }
 }
 
+// Board styles definition.
 Board.styled = ({ boardSize = 50} = {}) => `
   main {
     background-color: #000;

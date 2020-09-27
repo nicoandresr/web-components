@@ -1,52 +1,22 @@
-// InitialState:
+// -----------------------------InitialState----------------------------------
 const getInitialState = () => ({
-  boardSize: 50,
-  direction: 'right',
-  food: { x: 30, y: 15 },
+  boardSize: 50, // The board size is a square of 50 points, each point corresponds to 16x16 px.
+  direction: 'right', // The initial direction is right.
+  food: { x: 30, y: 15 }, // The first food is in this point.
   gameOver: false,
-  score: { points: 0, max: 0, isMaxScore: false },
-  snake: {
+  score: { points: 0, max: 0, isMaxScore: false }, // The score object.
+  snake: { // The snake is a sucession of points it the board, the initial snake have three points.
     body: [
-      { x: 25, y: 25},
-      { x: 24, y: 25},
-      { x: 23, y: 25},
+      { x: 25, y: 25}, // The first point is the head.
+      { x: 24, y: 25}, // The middle points are the core.
+      { x: 23, y: 25}, // THe last point is the tail.
     ]
   }
 });
-
-// Store:
+// --------------------------------Store Instance-----------------------
 const snakeDispatcher = new Dispatcher();
 const snakeStore = new Store(snakeDispatcher, getInitialState());
-
-// Actions:
-const createAction = type => payload => ({ type, payload });
-
-const ADD_POINT = 'ADD_POINT';
-const addPoint = (point = 1) => createAction(ADD_POINT)(point);
-
-const RESTART_GAME = 'RESTART_GAME';
-const restartGame = createAction(RESTART_GAME);
-
-const SET_DIRECTION = 'SET_DIRECTION';
-const setDirection = createAction(SET_DIRECTION);
-
-const SET_MOTION = 'SET_MOTION';
-const setMotion = createAction(SET_MOTION);
-
-const SET_FOOD = 'SET_FOOD';
-const setFood = createAction(SET_FOOD);
-
-const RELOCATE_SNAKE = 'RELOCATE_SNAKE';
-const relocateSnake = createAction(RELOCATE_SNAKE);
-
-const REVERSE_SNAKE_DIRECTION = 'REVERSE_SNAKE_DIRECTION';
-const revertDirection= createAction(REVERSE_SNAKE_DIRECTION);
-
-const RESIZE_BOARD = 'RESIZE_BOARD';
-const resizeBoard = createAction(RESIZE_BOARD);
-
-// Handlers:
-
+// --------------------------------Handlers---------------------------
 const inverseModel = {
   up: 'down',
   down: 'up',
@@ -75,7 +45,7 @@ snakeStore.addHandler({
 
 snakeStore.addHandler({
   [SET_DIRECTION]: (state, { payload }) => {
-    if (inverseModel[state.direction] === payload) return;
+    if (payload === inverseModel[state.direction]) return;
     state.direction = payload;
   }
 });
@@ -91,26 +61,35 @@ snakeStore.addHandler({
       up: ({ x, y }) => ({ x, y: y - 1 }),
       down: ({ x, y }) => ({ x, y: y + 1 })
     };
-
     const [head] = state.snake.body;
     const { x, y } = model[direction](head);
+    // Checks if the new direction is out of the board.
     if (limit.includes(x) || limit.includes(y)) {
       snakeDispatcher.dispatch(revertDirection());
       snakeDispatcher.dispatch(resizeBoard());
       return;
     }
-    
+    // The snake is automatically relocated after each colision, 
+    // If the snake was not relocated then the game is over.
     if (snake.body.some(b => b.x === x && b.y === y)) {
       state.gameOver = true;
       return;
     }
+    // The new head is added to the snake, this simulates
+    // the snake motion.
     state.snake.body.unshift({ x, y });
+    // If the new head is over the food...
     if (food.x === x && food.y === y) {
+      // when we create a new food
       snakeDispatcher.dispatch(setFood());
+      // And ups the score in one point.
       snakeDispatcher.dispatch(addPoint());
+      // Here we returns and the snake grows.
       return;
     }
 
+    // If the snake is not over the food...
+    // the snake lost her tail, this simulates the snake motion.
     state.snake.body.pop();
   }
 });
